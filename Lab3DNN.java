@@ -25,7 +25,7 @@ import javax.imageio.ImageIO;
 
 public class Lab3DNN {
 
-    private static int     imageSize = 8; // Images are imageSize x imageSize.  The provided data is 128x128, but this can be resized by setting this value (or passing in an argument).
+    private static int     imageSize = 32; // Images are imageSize x imageSize.  The provided data is 128x128, but this can be resized by setting this value (or passing in an argument).
     // You might want to resize to 8x8, 16x16, 32x32, or 64x64; this can reduce your network size and speed up debugging runs.
     // ALL IMAGES IN A TRAINING RUN SHOULD BE THE *SAME* SIZE.
     private static enum    Category { airplanes, butterfly, flower, grand_piano, starfish, watch };  // We'll hardwire these in, but more robust code would not do so.
@@ -33,15 +33,16 @@ public class Lab3DNN {
     private static final Boolean    useRGB = false; // If true, FOUR units are used per pixel: red, green, blue, and grey.  If false, only ONE (the grey-scale value).
     private static       int unitsPerPixel = (useRGB ? 4 : 1); // If using RGB, use red+blue+green+grey.  Otherwise just use the grey value.
 
-    private static String    modelToUse = "oneLayer"; // Should be one of { "perceptrons", "oneLayer", "deep" };  You might want to use this if you are trying approaches other than a Deep ANN.
+    private static String    modelToUse = "deep"; // Should be one of { "perceptrons", "oneLayer", "deep" };  You might want to use this if you are trying approaches other than a Deep ANN.
     private static int       inputVectorSize;         // The provided code uses a 1D vector of input features.  You might want to create a 2D version for your Deep ANN code.
     // Or use the get2DfeatureValue() 'accessor function' that maps 2D coordinates into the 1D vector.
     // The last element in this vector holds the 'teacher-provided' label of the example.
 
     private static double eta       =    0.1, fractionOfTrainingToUse = 1.00, dropoutRate = 0.50; // To turn off drop out, set dropoutRate to 0.0 (or a neg number).
-    private static int    maxEpochs = 1000; // Feel free to set to a different value.
+    private static int    maxEpochs = 1; // Feel free to set to a different value. 1000
 
     public static void main(String[] args) {
+
         String trainDirectory = "images/trainset/";
         String  tuneDirectory = "images/tuneset/";
         String  testDirectory = "images/testset/";
@@ -123,6 +124,7 @@ public class Lab3DNN {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     private static Category convertCategoryStringToEnum(String name) {
+
         if ("airplanes".equals(name))   return Category.airplanes; // Should have been the singular 'airplane' but we'll live with this minor error.
         if ("butterfly".equals(name))   return Category.butterfly;
         if ("flower".equals(name))      return Category.flower;
@@ -196,9 +198,9 @@ public class Lab3DNN {
                 int xValue = (index / unitsPerPixel) % image.getWidth();
                 int yValue = (index / unitsPerPixel) / image.getWidth();
                 //	System.out.println("  xValue = " + xValue + " and yValue = " + yValue + " for index = " + index);
-                if      (index % 3 == 0) result.add(image.getRedChannel()  [xValue][yValue] / 255.0); // If unitsPerPixel > 4, this if-then-elseif needs to be edited!
-                else if (index % 3 == 1) result.add(image.getGreenChannel()[xValue][yValue] / 255.0);
-                else if (index % 3 == 2) result.add(image.getBlueChannel() [xValue][yValue] / 255.0);
+                if      (index % 4 == 0) result.add(image.getRedChannel()  [xValue][yValue] / 255.0); // If unitsPerPixel > 4, this if-then-elseif needs to be edited!
+                else if (index % 4 == 1) result.add(image.getGreenChannel()[xValue][yValue] / 255.0);
+                else if (index % 4 == 2) result.add(image.getBlueChannel() [xValue][yValue] / 255.0);
                 else                     result.add(image.getGrayImage()   [xValue][yValue] / 255.0); // Seems reasonable to also provide the GREY value.
             } else {
                 int xValue = index % image.getWidth();
@@ -220,25 +222,46 @@ public class Lab3DNN {
         return convertMillisecondsToTimeSpan(millisec, 0);
     }
     public static String convertMillisecondsToTimeSpan(long millisec, int digits) {
-        if (millisec ==    0) { return "0 seconds"; } // Handle these cases this way rather than saying "0 milliseconds."
-        if (millisec <  1000) { return comma(millisec) + " milliseconds"; } // Or just comment out these two lines?
-        if (millisec > millisecInDay)    { return comma(millisec / millisecInDay)    + " days and "    + convertMillisecondsToTimeSpan(millisec % millisecInDay,    digits); }
-        if (millisec > millisecInHour)   { return comma(millisec / millisecInHour)   + " hours and "   + convertMillisecondsToTimeSpan(millisec % millisecInHour,   digits); }
-        if (millisec > millisecInMinute) { return comma(millisec / millisecInMinute) + " minutes and " + convertMillisecondsToTimeSpan(millisec % millisecInMinute, digits); }
+
+        if (millisec ==    0) {
+
+            return "0 seconds";
+        } // Handle these cases this way rather than saying "0 milliseconds."
+        if (millisec <  1000) {
+
+            return comma(millisec) + " milliseconds";
+        } // Or just comment out these two lines?
+        if (millisec > millisecInDay)    {
+
+            return comma(millisec / millisecInDay)    + " days and "    + convertMillisecondsToTimeSpan(millisec % millisecInDay,    digits);
+        }
+        if (millisec > millisecInHour)   {
+
+            return comma(millisec / millisecInHour)   + " hours and "   + convertMillisecondsToTimeSpan(millisec % millisecInHour,   digits);
+        }
+        if (millisec > millisecInMinute) {
+
+            return comma(millisec / millisecInMinute) + " minutes and " + convertMillisecondsToTimeSpan(millisec % millisecInMinute, digits);
+        }
 
         return truncate(millisec / 1000.0, digits) + " seconds";
     }
 
     public static String comma(int value) { // Always use separators (e.g., "100,000").
+
+
         return String.format("%,d", value);
     }
     public static String comma(long value) { // Always use separators (e.g., "100,000").
+
         return String.format("%,d", value);
     }
     public static String comma(double value) { // Always use separators (e.g., "100,000").
+
         return String.format("%,f", value);
     }
     public static String padLeft(String value, int width) {
+
         String spec = "%" + width + "s";
         return String.format(spec, value);
     }
@@ -255,10 +278,14 @@ public class Lab3DNN {
      *         number of decimal places.
      */
     public static String truncate(double d, int decimals) {
+
         double abs = Math.abs(d);
         if (abs > 1e13)             {
+
             return String.format("%."  + (decimals + 4) + "g", d);
+
         } else if (abs > 0 && abs < Math.pow(10, -decimals))  {
+
             return String.format("%."  +  decimals      + "g", d);
         }
         return     String.format("%,." +  decimals      + "f", d);
@@ -270,6 +297,7 @@ public class Lab3DNN {
      * @param vector Vector to permute in place.
      */
     public static <T> void permute(Vector<T> vector) {
+
         if (vector != null) { // NOTE from JWS (2/2/12): not sure this is an unbiased permute; I prefer (1) assigning random number to each element, (2) sorting, (3) removing random numbers.
             // But also see "http://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle" which justifies this.
     		/*	To shuffle an array a of n elements (indices 0..n-1):
@@ -307,6 +335,7 @@ public class Lab3DNN {
      * @return Returns a random integer in the given interval [lower, upper).
      */
     public static int randomInInterval(int lower, int upper) {
+
         return lower + (int) Math.floor(random() * (upper - lower));
     }
 
@@ -318,18 +347,21 @@ public class Lab3DNN {
      * @see Utils#randomInInterval(int, int)
      */
     public static int random0toNminus1(int upper) {
+
         return randomInInterval(0, upper);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////  Write your own code below here.  Feel free to use or discard what is provided.
 
     private static int trainPerceptrons(Vector<Vector<Double>> trainFeatureVectors, Vector<Vector<Double>> tuneFeatureVectors, Vector<Vector<Double>> testFeatureVectors) {
+
         Vector<Vector<Double>> perceptrons = new Vector<Vector<Double>>(Category.values().length);  // One perceptron per category.
 
         for (int i = 0; i < Category.values().length; i++) {
             Vector<Double> perceptron = new Vector<Double>(inputVectorSize);  // Note: inputVectorSize includes the OUTPUT CATEGORY as the LAST element.  That element in the perceptron will be the BIAS.
             perceptrons.add(perceptron);
-            for (int indexWgt = 0; indexWgt < inputVectorSize; indexWgt++) perceptron.add(getRandomWeight(inputVectorSize, 1)); // Initialize weights.
+            for (int indexWgt = 0; indexWgt < inputVectorSize; indexWgt++)
+                perceptron.add(getRandomWeight(inputVectorSize, 1)); // Initialize weights.
         }
 
         if (fractionOfTrainingToUse < 1.0) {  // Randomize list, then get the first N of them.
@@ -408,8 +440,57 @@ public class Lab3DNN {
 
 
     private static int trainDeep(Vector<Vector<Double>> trainFeatureVectors, Vector<Vector<Double>> tuneFeatureVectors,	Vector<Vector<Double>> testFeatureVectors) {
-        // You need to implement this method!
-        return -1;
+
+        long  overallStart = System.currentTimeMillis(), start = overallStart;
+        int trainSetErrors = Integer.MAX_VALUE, tuneSetErrors = Integer.MAX_VALUE, best_tuneSetErrors = Integer.MAX_VALUE, testSetErrors = Integer.MAX_VALUE, best_epoch = -1, testSetErrorsAtBestTune = Integer.MAX_VALUE;
+
+
+        /**       < 1 >  Architecture of CNN can be modified in  ConvNet constructor method inside ConvNet.java
+         *        < 2 >  All hyperparameters of CNN is passed as parameter to constructor  ConvNet
+         *        < 3 >  debug switch debugDeepCNN can be used to enable/disable debug messages
+         *        < 4 >  Current implementation assigns same number of activation maps to all convolution layer
+         *        < 5 >  Kernel size should be selected appropriately
+         *        < 6 >  Padding is not used now
+         *        < 7 >  Currently stride size is 1
+         */
+
+        boolean debugDeepCNN        = false;
+
+        int countActivationMapsConv = 16;
+        int kernelSizeConv          = 5 ;
+        int countClasses            = 6;
+        int padding                 = 0;
+        int stride                  = 1;
+
+
+        int hyperparameters         = ( (padding <<28)|(countClasses<<24) |(stride <<16) | (kernelSizeConv << 8) | countActivationMapsConv )  ;
+
+
+        ConvNet CNN = new ConvNet(trainFeatureVectors , hyperparameters, debugDeepCNN);
+
+        /**
+         * Architecture of CNN  and hyperparameters   ends here
+         */
+
+        for( int epochCount = 0; epochCount < maxEpochs; epochCount ++) {
+
+            permute(trainFeatureVectors);
+
+            CNN.trainCNN(trainFeatureVectors);
+            CNN.tuneCNN(tuneFeatureVectors);
+
+            System.out.println("Done with Epoch # " + comma(epochCount) + ".  Took " + convertMillisecondsToTimeSpan(System.currentTimeMillis() - start) + " (" + convertMillisecondsToTimeSpan(System.currentTimeMillis() - overallStart) + " overall).");
+            //reportConvNetConfig(); // Print out some info after epoch, so you can see what experiment is running in a given console.
+            start = System.currentTimeMillis();
+
+        }
+
+        CNN.testCNN(testFeatureVectors);
+
+        System.out.println("\n***** Best tuneset errors = " + comma(best_tuneSetErrors) + " of " + comma(tuneFeatureVectors.size()) + " (" + truncate((100.0 *      best_tuneSetErrors) / tuneFeatureVectors.size(), 2) + "%) at epoch = " + comma(best_epoch)
+                + " (testset errors = "    + comma(testSetErrorsAtBestTune) + " of " + comma(testFeatureVectors.size()) + ", " + truncate((100.0 * testSetErrorsAtBestTune) / testFeatureVectors.size(), 2) + "%).\n");
+
+        return testSetErrorsAtBestTune;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
