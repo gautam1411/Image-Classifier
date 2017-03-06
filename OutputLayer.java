@@ -35,18 +35,21 @@ public class OutputLayer{
         debugOutputLayer = debugSwitch;
         countClasses = (hyperparameters >> 24)& (0XFF);
 
+        if(debugOutputLayer) {
+            System.out.println("<OutputLayer> : OutputLayer Constructor previous layer as FlatLayer ");
+            System.out.println("<OutputLayer> : Number of classes : "+countClasses);
+
+        }
+
+        int countInputs = flat.getCountInputs();
+
         if(debugOutputLayer)
-        System.out.println("<OutputLayer> : OutputLayer Constructor previous layer as FlatLayer");
+        System.out.println(" input array size "+countInputs);
 
-        int count = flat.getCountInputs();
-
-        if(debugOutputLayer)
-        System.out.println(" input array size "+count);
-
-        input = new Double [ flat.getCountInputs()  ];
+        input = new Double [ countInputs ];
         output = new Double[countClasses];
         expected = new Double[countClasses];
-        weights = new Double [countClasses][flat.getCountInputs()];
+        weights = new Double [countClasses][countInputs];
         initWeights();
     }
 
@@ -81,8 +84,7 @@ public class OutputLayer{
 
             for( int j = 0; j < weights[0].length; j++) {
 
-                //System.out.println(" train flat  " +i+ "  "+j);
-                sum += weights[i][j];// * input[j];
+                sum += weights[i][j] /* * input[j] */ ;
             }
             output[i] = sum;
 

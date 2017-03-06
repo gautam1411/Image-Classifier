@@ -42,8 +42,9 @@ public class Convolution{
 
     public Convolution( Vector<Vector<Double>> inputFeatureVectors, int hyperparameters, boolean debugSwitch){
 
-        setHyperParameters( hyperparameters);
         debugconv = debugSwitch;
+        setHyperParameters( hyperparameters);
+
 
         this.feature_maps = new ArrayList<FeatureMap> ();
 
@@ -79,14 +80,18 @@ public class Convolution{
         padding                 =  (hyperParameter >>28)  & (0xFF);
         stride                  =  (hyperParameter >> 16) & (0xFF);
         kernel_size             =  (hyperParameter >>8)   & (0xFF);
-        countFeatureMaps        =  hyperParameter & (0xFF);
+        countFeatureMaps        =   hyperParameter        & (0xFF);
+
+        if( debugconv)
+        System.out.println(" "+padding+"   "+stride + "   "+ kernel_size+ "   "+ countFeatureMaps);
 
     }
 
     public Convolution( Pooling poolLayer, int hyperparameters, boolean debugSwitch){
 
-        setHyperParameters( hyperparameters);
         debugconv = debugSwitch;
+        setHyperParameters( hyperparameters);
+
 
         if(debugconv)
         System.out.println(" Conv Layer Constructor ");

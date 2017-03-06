@@ -477,7 +477,7 @@ public class Lab3DNN {
             permute(trainFeatureVectors);
 
             CNN.trainCNN(trainFeatureVectors);
-            CNN.tuneCNN(tuneFeatureVectors);
+            //CNN.tuneCNN(tuneFeatureVectors);
 
             System.out.println("Done with Epoch # " + comma(epochCount) + ".  Took " + convertMillisecondsToTimeSpan(System.currentTimeMillis() - start) + " (" + convertMillisecondsToTimeSpan(System.currentTimeMillis() - overallStart) + " overall).");
             //reportConvNetConfig(); // Print out some info after epoch, so you can see what experiment is running in a given console.
@@ -485,7 +485,7 @@ public class Lab3DNN {
 
         }
 
-        CNN.testCNN(testFeatureVectors);
+        //CNN.testCNN(testFeatureVectors);
 
         System.out.println("\n***** Best tuneset errors = " + comma(best_tuneSetErrors) + " of " + comma(tuneFeatureVectors.size()) + " (" + truncate((100.0 *      best_tuneSetErrors) / tuneFeatureVectors.size(), 2) + "%) at epoch = " + comma(best_epoch)
                 + " (testset errors = "    + comma(testSetErrorsAtBestTune) + " of " + comma(testFeatureVectors.size()) + ", " + truncate((100.0 * testSetErrorsAtBestTune) / testFeatureVectors.size(), 2) + "%).\n");

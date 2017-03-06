@@ -13,7 +13,6 @@ public class PoolMap{
 
     private Double [][] inputFeature;
     private Double [][] outputMap;
-   // private Double [][]         // pooling has no kernel but a pooling function max, avg etc
 
     //private int poolRatio;
     private boolean debugPoolMap = false;
@@ -117,7 +116,9 @@ public class PoolMap{
 
     public void computePoolMap(){
 
+        // Maxpool have been found to work better. we can test avgpool also
         maxPool();
+       // avgPool();
 
     }
 

@@ -64,7 +64,6 @@ public class FlatLayer{
         ArrayList<PoolMap> poolMaps = pool.get_P_maps();
 
         readInputFeature(poolMaps);
-        //computeVote();
 
     }
 
@@ -78,10 +77,6 @@ public class FlatLayer{
         countInputs = (countPoolMap) *(dimPlate*dimPlate);
 
         input = new Double[countInputs];
-        //weight = new Double[countInputs];
-        //vote = new Double[countInputs];
-
-        //initWeights();
 
         if(debugFlatLayer)
         System.out.println(" <FlatLayer>: Constructor  for Pool as previous layer  : " + countInputs);
