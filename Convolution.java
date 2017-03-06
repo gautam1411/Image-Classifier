@@ -77,7 +77,7 @@ public class Convolution{
 
     public void setHyperParameters( int hyperParameter){
 
-        padding                 =  (hyperParameter >>28)  & (0xFF);
+        padding                 =  (hyperParameter >>28)  & (0xF);
         stride                  =  (hyperParameter >> 16) & (0xFF);
         kernel_size             =  (hyperParameter >>8)   & (0xFF);
         countFeatureMaps        =   hyperParameter        & (0xFF);

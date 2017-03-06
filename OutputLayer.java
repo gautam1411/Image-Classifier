@@ -33,7 +33,7 @@ public class OutputLayer{
     public OutputLayer(FlatLayer flat, int hyperparameters, boolean debugSwitch){
 
         debugOutputLayer = debugSwitch;
-        countClasses = (hyperparameters >> 24)& (0XFF);
+        countClasses = (hyperparameters >> 24)& (0XF);
 
         if(debugOutputLayer) {
             System.out.println("<OutputLayer> : OutputLayer Constructor previous layer as FlatLayer ");
@@ -78,13 +78,13 @@ public class OutputLayer{
     public void train(FlatLayer flat){
 
 
-        for (int i = 0; i< 6 ; i++){
+        for (int i = 0; i< countClasses ; i++){
 
             Double sum = 0.0;
 
             for( int j = 0; j < weights[0].length; j++) {
 
-                sum += weights[i][j] /* * input[j] */ ;
+                sum += weights[i][j] ; /* input[j] */ ;
             }
             output[i] = sum;
 
