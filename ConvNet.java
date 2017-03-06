@@ -58,6 +58,7 @@ public class ConvNet{
                maxPool2.printPoolMaps();
                flat.printAct();
            }
+           out.printPrediction();
        }
    }
 

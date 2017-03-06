@@ -11,7 +11,7 @@ import java.util.Random;
 public class OutputLayer{
 
 
-    private Double [] input;
+    private Double [] inputs;
     private Double [] output;
     private Double [] expected;
     private Double [][] weights;
@@ -43,10 +43,11 @@ public class OutputLayer{
 
         int countInputs = flat.getCountInputs();
 
-        if(debugOutputLayer)
-        System.out.println(" input array size "+countInputs);
+        if(debugOutputLayer) {
+            System.out.println(" input array size " + countInputs);
 
-        input = new Double [ countInputs ];
+        }
+        inputs = new Double [countInputs];
         output = new Double[countClasses];
         expected = new Double[countClasses];
         weights = new Double [countClasses][countInputs];
@@ -74,9 +75,31 @@ public class OutputLayer{
 
     }
 
+    public void printPrediction(){
+
+        for(int i = 0; i < countClasses; i++){
+            System.out.println("  "+i+" : "+output[i]);
+        }
+    }
+
+    public void readInputs(FlatLayer flat){
+
+        Double [] ip = flat.getInput();
+
+        for (int i = 0; i < inputs.length; i++) {
+
+            inputs[i] = ip[i];
+            //System.out.println(" index: "+i+"   :  "+inputs[i]);
+        }
+        if(debugOutputLayer)
+        System.out.println("<OutputLayer> Input read successfully : " + inputs.length);
+
+    }
+
 
     public void train(FlatLayer flat){
 
+        readInputs( flat);
 
         for (int i = 0; i< countClasses ; i++){
 
@@ -84,11 +107,10 @@ public class OutputLayer{
 
             for( int j = 0; j < weights[0].length; j++) {
 
-                sum += weights[i][j] ; /* input[j] */ ;
+                //System.out.println(" i,j : " + i+"   "+j);
+                sum += weights[i][j] * inputs[j] ;
             }
             output[i] = sum;
-
-            System.out.println( " Prediction : " +i + " >  " +sum);
 
         }
 

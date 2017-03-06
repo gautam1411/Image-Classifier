@@ -28,8 +28,8 @@ public class PoolMap{
         outputMap = new Double[outVol][outVol];
         debugPoolMap = debugSwitch;
 
-        plateSize = plateSize;
-        outVol = outVol;
+        this.plateSize = plateSize;
+        this.outVol = outVol;
 
         //poolRatio = plateSize/outVol ;
 

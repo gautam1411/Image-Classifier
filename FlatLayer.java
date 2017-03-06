@@ -40,14 +40,19 @@ public class FlatLayer{
 
     public  void readInputFeature(  ArrayList<PoolMap> poolMaps ){
 
+        if(debugFlatLayer)
+        System.out.println(" PoolMaps size is : " + poolMaps.size());
+
+
         for(int i = 0; i <  poolMaps.size(); i++){
 
             PoolMap plate = poolMaps.get(i);
 
             int dimPlate = plate.getOutVol();
             int sizePlate = dimPlate * dimPlate ;
-
             Double [][] plateOut  = plate.getOutput();
+
+            //System.out.println( " DimPlate : "+dimPlate+"  SizePlate " + sizePlate + "  plateOut.length: " + plateOut.length);
 
             for( int j = 0 ; j < plateOut.length; j++){
 
@@ -80,7 +85,6 @@ public class FlatLayer{
 
         if(debugFlatLayer)
         System.out.println(" <FlatLayer>: Constructor  for Pool as previous layer  : " + countInputs);
-
 
     }
 
