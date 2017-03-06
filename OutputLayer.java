@@ -80,10 +80,13 @@ public class OutputLayer{
         for(int i = 0; i < countClasses; i++){
             System.out.println("  "+i+" : "+output[i]);
         }
+        System.out.println("");
+        System.out.println("Input image label : "+label);
     }
 
     public void readInputs(FlatLayer flat){
 
+        this.label = flat.getLabel();
         Double [] ip = flat.getInput();
 
         for (int i = 0; i < inputs.length; i++) {

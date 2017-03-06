@@ -144,6 +144,17 @@ public class Pooling{
 
     }
 
+    public void train(  Convolution conv   ){
+
+        this.label = conv.getLabel();
+
+        ArrayList<FeatureMap> feature_maps = conv.get_fMaps();
+
+        readInputFeature(feature_maps);
+        calcPoolMaps();
+
+    }
+
     public int outputVolume(){
 
         return outVol;
@@ -151,6 +162,11 @@ public class Pooling{
 
     public void  connectPreConv( Convolution conv){
 
+    }
+
+    public Double getLabel(){
+
+        return this.label;
     }
 
 }

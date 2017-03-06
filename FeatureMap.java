@@ -157,4 +157,9 @@ public class FeatureMap{
 
         return height;
     }
+
+    public Double getLabel(){
+
+        return label;
+    }
 }

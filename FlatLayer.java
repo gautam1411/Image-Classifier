@@ -67,7 +67,7 @@ public class FlatLayer{
     public  void train(Pooling pool){
 
         ArrayList<PoolMap> poolMaps = pool.get_P_maps();
-
+        this.label = pool.getLabel();
         readInputFeature(poolMaps);
 
     }
@@ -102,6 +102,11 @@ public class FlatLayer{
     public Double [] getInput (){
 
         return input;
+    }
+
+    public Double getLabel (){
+
+        return this.label;
     }
 
 }

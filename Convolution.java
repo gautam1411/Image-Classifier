@@ -159,12 +159,17 @@ public class Convolution{
 
     public void readInputFeature(Vector <Double> featureVector){
 
+
         for (FeatureMap feature_map: feature_maps){
 
             feature_map.readFeatureVector(featureVector);
-
-
         }
+
+        this.label = featureVector.get(featureVector.size()-1);
+
+        if(debugconv)
+            System.out.println(" Image Label : " + debugconv);
+
     }
 
 
@@ -207,6 +212,8 @@ public class Convolution{
 
     public void train( Pooling pool){
 
+        this.label = pool.getLabel();
+
         readInputFeature(pool.get_P_maps());
         calcFeatureMaps();
 
@@ -225,6 +232,11 @@ public class Convolution{
            System.out.println("Error: <Convolution Layer>    <Hyperparameters Settings>");
         }
         return outVolume;
+    }
+
+    public Double getLabel(){
+
+        return this.label;
     }
 
 

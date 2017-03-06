@@ -22,7 +22,6 @@ public class ConvNet{
     private OutputLayer out;
 
 
-
    public ConvNet( Vector<Vector<Double>> inputFeatureVectors , int hyperparameters, boolean debugSwitch){
 
        debugCNN     = debugSwitch;
@@ -44,9 +43,9 @@ public class ConvNet{
            Vector<Double> trainFeatureVector = trainFeatureVectors.get(trainingIpNum);
 
            conv1.train(trainFeatureVector);
-           maxPool1.train(conv1.get_fMaps());
+           maxPool1.train(conv1);
            conv2.train(maxPool1);
-           maxPool2.train(conv2.get_fMaps());
+           maxPool2.train(conv2);
            flat.train(maxPool2);
            out.train(flat);
 
@@ -69,9 +68,9 @@ public class ConvNet{
             Vector<Double> tuneFeatureVector = tuneFeatureVectors.get(tuningIpNum);
 
             conv1.train(tuneFeatureVector);
-            maxPool1.train(conv1.get_fMaps());
+            maxPool1.train(conv1);
             conv2.train(maxPool1);
-            maxPool2.train(conv2.get_fMaps());
+            maxPool2.train(conv2);
             flat.train(maxPool2);
             out.train(flat);
 
@@ -93,9 +92,9 @@ public class ConvNet{
             Vector<Double> testFeatureVector = testFeatureVectors.get(testIpNum);
 
             conv1.train(testFeatureVector);
-            maxPool1.train(conv1.get_fMaps());
+            maxPool1.train(conv1);
             conv2.train(maxPool1);
-            maxPool2.train(conv2.get_fMaps());
+            maxPool2.train(conv2);
             flat.train(maxPool2);
             out.train(flat);
 
