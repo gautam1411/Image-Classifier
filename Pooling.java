@@ -9,6 +9,7 @@
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.List;
+import java.util.Arrays;
 
 public class Pooling{
 
@@ -25,8 +26,6 @@ public class Pooling{
         private int outVol;
 
         private Double label;
-
-
 
         public Pooling(){
 
@@ -167,6 +166,90 @@ public class Pooling{
     public Double getLabel(){
 
         return this.label;
+    }
+
+
+    public void backpropagate (FlatLayer flat){
+
+        // error  from flat layer
+        Double [] err = flat.getErrors();
+
+        for ( int i = 0; i < poolMaps.size() ; i++){
+
+            PoolMap pmap = poolMaps.get(i);
+
+            Double [][] error = pmap.getErrors();
+
+            for(int j = 0 ; j < error.length; j++){
+                if(debugPool)
+                System.out.println(" "+ err.length+" "+i+" "+outVol+" "+j+" "+error[j].length+" ");
+                System.arraycopy(err, (i*outVol*outVol ) +(j*outVol) , error[j],0,error[j].length);
+            }
+
+            pmap.backpropagate();
+        }
+
+    }
+
+
+    /*
+    public void backpropagate (Convolution conv){
+
+        ArrayList<FeatureMap> fmaps = conv.get_fMaps();
+
+        for(int i = 0; i < fmaps.size(); i++){
+
+            FeatureMap  fm = fmaps.get(i);
+
+            PoolMap pm = poolMaps.get(i);
+
+            Double [][] error = pm.getErrors();
+
+            Double [][] err = fm.getErrors();
+
+            for (int j = 0 ; j < err.length; j++){
+
+                System.arraycopy(err[j],0,error[j],0, err[j].length);
+            }
+
+        }
+
+    } */
+
+    public void backpropagate (Convolution conv){
+
+        ArrayList<FeatureMap> fmaps = conv.get_fMaps();
+        int kernel_size = conv.getKernelSize();
+
+        // For simplicity using equal number of plates in consecutive layer
+        for(int i = 0; i < fmaps.size(); i++){
+
+           FeatureMap  fm = fmaps.get(i);
+
+            PoolMap pm = poolMaps.get(i);
+
+            Double [][] error = pm.getErrors();
+
+            Double [][] err = fm.getErrors();
+
+            /*
+            for (int j = 0 ; j < err.length; j++){
+
+                System.arraycopy(err[j],0,error[j],0, err[j].length);
+            }
+            */
+
+            // Array fill zero
+            for(int x=0; x< error.length; x++)
+                Arrays.fill(error[x], 0.0);
+
+            // Padded error matrix by zero from all 4 sides based on kernel size
+            // Need to verify if its work fine
+            for(int x = 0; x < err.length; x++)
+                System.arraycopy( err[x], 0, error[x+kernel_size/2],kernel_size/2,err[x].length);
+
+        }
+
     }
 
 }

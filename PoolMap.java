@@ -13,6 +13,7 @@ public class PoolMap{
 
     private Double [][] inputFeature;
     private Double [][] outputMap;
+    private Double [][] errors;
 
     //private int poolRatio;
     private boolean debugPoolMap = false;
@@ -22,31 +23,43 @@ public class PoolMap{
 
 
 
-
-
     public PoolMap(int plateSize, int outVol, boolean debugSwitch){
 
-        inputFeature = new Double [plateSize][plateSize];
-        outputMap = new Double[outVol][outVol];
         debugPoolMap = debugSwitch;
 
-        this.plateSize = plateSize;
-        this.outVol = outVol;
-
-        //poolRatio = plateSize/outVol ;
-
         if(debugSwitch)
-        System.out.println("Input plate size: "+plateSize + " Output plate size: " + outVol);
+            System.out.println("Input plate size: "+plateSize + " Output plate size: " + outVol);
+
+        if( plateSize <= 0 || outVol <= 0 ){
+
+            System.out.println("<PoolMap> : Invalid parameter");
+        }else {
+            inputFeature = new Double[plateSize][plateSize];
+            outputMap = new Double[outVol][outVol];
+            errors = new Double[outVol][outVol];
+            debugPoolMap = debugSwitch;
+
+            this.plateSize = plateSize;
+            this.outVol = outVol;
+
+            //poolRatio = plateSize/outVol ;
+        }
 
     }
 
 
     public void maxPool(){
 
-        int poolRatio = inputFeature.length / outputMap.length;
+        int poolRatio = 2; // Default value
 
-        if(debugPoolMap)
-            System.out.println("<PoolMap>: poolRatio : " +poolRatio );
+        if( outputMap.length != 0) {
+            poolRatio = inputFeature.length / outputMap.length;
+        }else{
+            System.out.println("<PoolMap> : Invalid parameter");
+        }
+
+        //if(debugPoolMap)
+         //   System.out.println("<PoolMap>: poolRatio : " +poolRatio );
 
         for(int i = 0; i< outputMap.length; i++)
             for(int j =0 ; j < outputMap[0].length;  j++){
@@ -57,7 +70,14 @@ public class PoolMap{
 
     public Double maxPoolHelper(int row, int col){
 
-        int poolRatio = inputFeature.length / outputMap.length;
+        int poolRatio = 2; // Default value
+
+        if(outputMap.length != 0) {
+
+           poolRatio =  inputFeature.length / outputMap.length;
+        }else{
+            System.out.println(" <PoolMap> : Invalid parameter");
+        }
 
         Double max = Double.MIN_VALUE;
 
@@ -78,7 +98,13 @@ public class PoolMap{
 
     public void avgPool(){
 
-        int poolRatio = inputFeature.length / outputMap.length;
+        int poolRatio = 2; // Default value
+
+        if(outputMap.length != 0) {
+            poolRatio = inputFeature.length / outputMap.length;
+        }else{
+            System.out.println("<PoolMap> : Invalid parameter");
+        }
 
         if(debugPoolMap)
             System.out.println("<PoolMap>: poolRatio : " +poolRatio );
@@ -92,7 +118,14 @@ public class PoolMap{
 
     public Double avgPoolHelper(int row, int col){
 
-        int poolRatio = inputFeature.length / outputMap.length;
+        int poolRatio = 2; // Set default value
+
+        if( outputMap.length != 0) {
+            poolRatio = inputFeature.length / outputMap.length;
+        }else{
+
+            System.out.println("Invalid parameter ");
+        }
 
         Double sum = 0.0;
 
@@ -142,6 +175,16 @@ public class PoolMap{
 
 
         return  outputMap;
+    }
+
+    public void backpropagate(){
+
+
+    }
+
+    public Double[][] getErrors(){
+
+        return errors;
     }
 
 }

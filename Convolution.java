@@ -8,6 +8,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.Arrays;
 
 public class Convolution{
 
@@ -85,6 +86,11 @@ public class Convolution{
         if( debugconv)
         System.out.println(" "+padding+"   "+stride + "   "+ kernel_size+ "   "+ countFeatureMaps);
 
+        if(kernel_size <=0 || countFeatureMaps <=0){
+
+            System.out.println("Inavlid parameter passes to Convolution layer constructor");
+        }
+
     }
 
     public Convolution( Pooling poolLayer, int hyperparameters, boolean debugSwitch){
@@ -100,7 +106,6 @@ public class Convolution{
 
 
         input_size = poolLayer.outputVolume();
-
 
 
         if(debugconv){
@@ -239,5 +244,222 @@ public class Convolution{
         return this.label;
     }
 
+
+/*
+    public void backpropagate(Pooling pool){
+
+
+        Double learning_rate = 0.01;
+
+        ArrayList<PoolMap> pmaps = pool.get_P_maps();
+
+        // Copy error vector from Pooling layer
+
+       for ( int i = 0; i < pmaps.size(); i ++){
+
+           PoolMap pm =pmaps.get(i);
+           FeatureMap fm = feature_maps.get(i);
+
+           Double [][] err = pm.getErrors();
+
+           Double [][] error = fm.getErrors();
+
+           for(int j = 0; j < err.length; j++){
+
+               System.arraycopy(err[j],0, error[j],0,err[j].length);
+           }
+
+       }
+
+        // For each plate ( feature/ activation map) do the following
+        // <1> For each entry in error matrix
+        // <2> Find winner value corresponsing to output featuremap
+
+        for( int i = 0 ; i < feature_maps.size(); i++){
+
+
+            FeatureMap fm = feature_maps.get(i);
+
+            Double [][] err = fm.getErrors();
+            Double [][] out = fm.getFeatureMap();
+            Double [][] ker = fm.getKernel();
+            Double [][] inp = fm.getInputMap();
+
+            System.out.println(" Error vector dimension :"+err.length+ "  "+err[0].length);
+
+            for(int j=0; j < err.length; j++){
+
+                for(int k = 0; k < err[0].length; k++){
+
+                    // find indices of winner value in output  matrix
+                    int downsample_ratio = input_size / outputVol ;
+
+                    int ind1 =  -1;
+                    int ind2 =  -1;
+                    Double max_val = Double.MIN_VALUE;
+
+                    for( int l = downsample_ratio * j;  l < (downsample_ratio *(j+1)) ; l++ ){
+
+                        for( int m = downsample_ratio * k;  m < (downsample_ratio *(k+1)) ; m++ ){
+
+                            if(out[l][m] > max_val){
+                                max_val = out[l][m];
+                                ind1 = l;
+                                ind2 = m;
+                            }
+                        }
+
+                    }
+
+                    if(true){
+                        System.out.println(" Max value: "+max_val + " , Ind1: "+ind1+"  ,Ind2  : "+ind2);
+                        System.out.println("<Convolution.java> : j,k  > "+j+"  "+k);
+                    }
+
+                    if(ind1 == -1 || ind2 == -1){
+
+                        if(true)
+                        System.out.println("<Convolution.java> : Failed to find indices of winner value");
+                    }else{
+
+                        // Remember we have calculated activation of neuron as
+                        // featureMap[i][j] = RELU(activation (i,j) );
+                        // we should compute gradient and update kernel
+
+                        for(int p=0; p < kernel_size; p++) {
+                            for (int q = 0; q < kernel_size; q++) {
+
+                                System.out.println(" "+p+" "+q+" "+j+" "+k+" "+ind1+" "+ind2);
+                                ker[p][q] += err[j][k]* learning_rate * inp[p+ind1][q+ind2];
+                            }
+                        }
+
+                    }
+
+                }
+            }
+
+        }
+
+    }
+    */
+
+    public void backpropagate(Pooling pool){
+
+
+        Double learning_rate = 0.01;
+
+        ArrayList<PoolMap> pmaps = pool.get_P_maps();
+
+
+        for ( int i = 0; i < pmaps.size(); i ++){
+
+            PoolMap pm =pmaps.get(i);
+            Double [][] err = pm.getErrors();
+
+            FeatureMap fm = feature_maps.get(i);
+            Double [][] error = fm.getErrors();
+            Double[][] out = fm.getFeatureMap();
+            //Double[][] ker = fm.getKernel();
+            //Double[][] inp = fm.getInputMap();
+
+            System.out.println(" Error vector dimension :" + err.length + "  " + err[0].length);
+
+            for( int x = 0 ;x<error.length ; x++ )
+                Arrays.fill(error[x], 0.0);
+
+
+            for(int j = 0; j < err.length; j++){
+
+                for(int k = 0; k < err[0].length ; k++){
+
+
+                    int downsample_ratio = input_size / outputVol;
+
+                    int ind1 = -1;
+                    int ind2 = -1;
+                    Double max_val = Double.MIN_VALUE;
+
+                    for (int l = downsample_ratio * j; l < (downsample_ratio * (j + 1)); l++) {
+
+                        for (int m = downsample_ratio * k; m < (downsample_ratio * (k + 1)); m++) {
+
+                            if (out[l][m] > max_val) {
+                                max_val = out[l][m];
+                                ind1 = l;
+                                ind2 = m;
+                            }
+                        }
+
+                    }
+
+                    if (true) {
+                        System.out.println(" Max value: " + max_val + " , Ind1: " + ind1 + "  ,Ind2  : " + ind2);
+                        System.out.println("<Convolution.java> : j,k  > " + j + "  " + k);
+                    }
+
+                    if (ind1 == -1 || ind2 == -1) {
+
+                        if (true)
+                            System.out.println("<Convolution.java> : Failed to find indices of winner value");
+                    }else{
+
+                        error[ind1][ind2] = err[j][k];
+
+                    }
+
+                }
+            }
+
+        }
+
+        // For each plate ( feature/ activation map) do the following
+        // <1> For each entry in error matrix
+
+        for( int i = 0 ; i < feature_maps.size(); i++){
+
+
+            FeatureMap fm = feature_maps.get(i);
+
+            Double [][] err = fm.getErrors();
+            Double [][] out = fm.getFeatureMap();
+            Double [][] ker = fm.getKernel();
+            Double [][] inp = fm.getInputMap();
+
+            if(debugconv)
+            System.out.println(" Error vector dimension :"+err.length+ "  "+err[0].length);
+
+            for(int j=0; j < err.length; j++){
+
+                for(int k = 0; k < err[0].length; k++){
+                    // Remember we have calculated activation of neuron as
+                    // featureMap[i][j] = RELU(activation (i,j) );
+                    // we should compute gradient and update kernel
+
+                    if(err[j][k] != 0.0) {
+
+                        for (int p = 0; p < kernel_size; p++) {
+
+                            for (int q = 0; q < kernel_size; q++) {
+
+                                if(debugconv)
+                                System.out.println(" " + p + " " + q + " " + j + " " + k + " ");
+
+                                ker[p][q] += err[j][k] * learning_rate * inp[p + j][q + k];
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+    }
+
+    public int getKernelSize(){
+
+        return kernel_size;
+
+    }
 
 }

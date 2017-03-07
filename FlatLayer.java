@@ -7,12 +7,12 @@
  */
 
 import java.util.ArrayList;
-//import java.lang.System;
 
 public class FlatLayer{
 
 
     private Double [] input;
+    private Double [] errors;
 
     private int countInputs;
 
@@ -82,6 +82,7 @@ public class FlatLayer{
         countInputs = (countPoolMap) *(dimPlate*dimPlate);
 
         input = new Double[countInputs];
+        errors = new Double[countInputs+1];
 
         if(debugFlatLayer)
         System.out.println(" <FlatLayer>: Constructor  for Pool as previous layer  : " + countInputs);
@@ -107,6 +108,20 @@ public class FlatLayer{
     public Double getLabel (){
 
         return this.label;
+    }
+
+    public void backpropagate (OutputLayer out){
+
+        Double [] err = out.getErrors();
+        //this.errors = new Double[ err.length];
+
+        System.arraycopy(err,0,errors,0,err.length);
+
+        // Nothing to do here as no activation function
+    }
+
+    public Double [] getErrors(){
+        return  errors;
     }
 
 }

@@ -25,7 +25,7 @@ import javax.imageio.ImageIO;
 
 public class Lab3DNN {
 
-    private static int     imageSize = 32; // Images are imageSize x imageSize.  The provided data is 128x128, but this can be resized by setting this value (or passing in an argument).
+    private static int     imageSize = 128; // Images are imageSize x imageSize.  The provided data is 128x128, but this can be resized by setting this value (or passing in an argument).
     // You might want to resize to 8x8, 16x16, 32x32, or 64x64; this can reduce your network size and speed up debugging runs.
     // ALL IMAGES IN A TRAINING RUN SHOULD BE THE *SAME* SIZE.
     private static enum    Category { airplanes, butterfly, flower, grand_piano, starfish, watch };  // We'll hardwire these in, but more robust code would not do so.
@@ -452,12 +452,14 @@ public class Lab3DNN {
          *        < 5 >  Kernel size should be selected appropriately
          *        < 6 >  Padding is not used now
          *        < 7 >  Currently stride size is 1
+         *        < 8 >  DNN architecture should be defined properly in ConvNet constructor and in proper sequence
+         *               in train, tune and test method otherwise Runtime error may haunt you
          */
 
         boolean debugDeepCNN        = false;
 
-        int countActivationMapsConv = 16;
-        int kernelSizeConv          = 5 ;
+        int countActivationMapsConv = 1;
+        int kernelSizeConv          = 9;
         int countClasses            = 6;
         int padding                 = 0;
         int stride                  = 1;

@@ -1,5 +1,4 @@
 /**
-*
  *
  *
  * This class defines Output Layer
@@ -15,6 +14,7 @@ public class OutputLayer{
     private Double [] output;
     private Double [] expected;
     private Double [][] weights;
+    private Double [] errors;
 
     private boolean debugOutputLayer = false;
     private int countClasses;
@@ -35,23 +35,25 @@ public class OutputLayer{
         debugOutputLayer = debugSwitch;
         countClasses = (hyperparameters >> 24)& (0XF);
 
-        if(debugOutputLayer) {
-            System.out.println("<OutputLayer> : OutputLayer Constructor previous layer as FlatLayer ");
-            System.out.println("<OutputLayer> : Number of classes : "+countClasses);
-
-        }
-
         int countInputs = flat.getCountInputs();
 
         if(debugOutputLayer) {
+            System.out.println("<OutputLayer> : OutputLayer Constructor previous layer as FlatLayer ");
+            System.out.println("<OutputLayer> : Number of classes : "+countClasses);
             System.out.println(" input array size " + countInputs);
 
         }
-        inputs = new Double [countInputs];
-        output = new Double[countClasses];
-        expected = new Double[countClasses];
-        weights = new Double [countClasses][countInputs];
-        initWeights();
+
+        if( countInputs <= 0 || countClasses <= 0){
+            System.out.println("<OutputLayer> : Inavlid parameter");
+        }else {
+            inputs = new Double[countInputs];
+            output = new Double[countClasses];
+            expected = new Double[countClasses];
+            weights = new Double[countClasses][countInputs + 1]; // all inputs + bias
+            errors = new Double[countInputs + 1];
+            initWeights();
+        }
     }
 
     public void initWeights(){
@@ -64,7 +66,7 @@ public class OutputLayer{
             for(int j = 0; j < weights[0].length; j++){
 
                 int sign = randSign.nextInt() % 2;
-                weights[i][j] = rand.nextDouble();
+                weights[i][j] =   rand.nextDouble();
 
                 if( sign == 0)
                     weights[i][j] *= -1;
@@ -108,15 +110,81 @@ public class OutputLayer{
 
             Double sum = 0.0;
 
-            for( int j = 0; j < weights[0].length; j++) {
+            for( int j = 0; j < weights[0].length-1; j++) {
 
-                //System.out.println(" i,j : " + i+"   "+j);
+                System.out.println(" i,j : " + i+"   "+j);
                 sum += weights[i][j] * inputs[j] ;
             }
             output[i] = sum;
 
         }
 
+        softmax(output);
+        printPrediction();
+
+    }
+
+    public void softmax( Double output[] ){
+
+        Double sum = 0.0;
+
+        for(int i =0 ; i < output.length; i++){
+            Double exp_val = Math.exp(output[i]);
+            sum += exp_val;
+            output[i] = exp_val;
+        }
+
+        for(int i = 0; i < output.length ; i++){
+            output[i] /= sum;
+        }
+    }
+
+    public void backpropagate( ){
+
+        // Assume  ==> learning rate =  0
+        Double learning_rate = 0.01;
+
+        int predicted_index = ( Double.valueOf(label) ).intValue( ) ;
+        expected[predicted_index] = 1.0;
+
+        for(int i = 0 ; i < errors.length; i++) {
+            errors[i] = 0.0;
+        }
+
+
+        for( int i = 0 ; i < inputs.length; i++ ){
+
+            errors[i] = 0.0;
+
+            for(int j = 0; j < output.length; j++){
+
+
+                if( j == predicted_index){
+
+                   weights[j][i] += ((1- output[j]) *  (output[j]) ) * learning_rate * inputs[i];
+                   //if(true)
+                   //    System.out.println("<OutLayer> i  , j  : " +i+"   "+j+  "  "+errors[i]);
+                   //System.out.println(" "+errors.length+ "  "+output.length+  "  " +inputs.length);
+                   errors[i] += ((1- output[j]) *  (output[j]) );
+
+
+                }else{
+
+                    weights[j][i] += ((0- output[j]) *  (output[j]) ) * learning_rate * inputs[i];
+
+                    //if(true)
+                    //    System.out.println("<OutLayer> i  , j  : " +i+"   "+j+ "   "+errors[j]);
+                   // System.out.println(" "+errors.length+ "  "+output.length+  "  " +inputs.length);
+                    errors[i] +=  ((0- output[j]) *  (output[j]) );
+                }
+            }
+        }
+
+    }
+
+    public Double [] getErrors(){
+
+        return errors;
     }
 
 }

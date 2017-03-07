@@ -17,24 +17,30 @@ public class FeatureMap{
     private Double [][] featureMap;
     private Double [][] inputFeature;
     private Double [][] kernel;
+    private Double [][] errors;
 
     private Double label;
 
     public FeatureMap(int input_size, int kernel_size,int outVol, boolean debugSwitch){
 
-       // System.out.println(" FeatureMap constructor" + input_size + " " +kernel_size+ " " + outVol );
-
         debugFeatMap = debugSwitch;
 
-        width = height = input_size;
-        this.kernel_size = kernel_size;
-        inputFeature = new Double[input_size][input_size];
-        kernel = new Double[kernel_size][kernel_size];
-        featureMap = new Double [outVol][outVol];
+        if(debugFeatMap)
+            System.out.println(" FeatureMap constructor" + input_size + " " +kernel_size+ " " + outVol );
 
-       // System.out.println( "  " + inputFeature + " " + kernel + " " + featureMap);
+        if(input_size <= 0 || kernel_size <=0 || outVol <= 0){
 
-        //System.out.println()
+            System.out.println("Inavlid parameter passes to FeatureMap Constructor");
+
+        }else {
+
+            width = height = input_size;
+            this.kernel_size = kernel_size;
+            inputFeature = new Double[input_size][input_size];
+            kernel = new Double[kernel_size][kernel_size];
+            featureMap = new Double[outVol][outVol];
+            errors = new Double[outVol][outVol];
+        }
 
     }
 
@@ -137,11 +143,19 @@ public class FeatureMap{
 
     }
 
+    public Double [][] getErrors(){
+        return errors;
+    }
+
     public Double [][] getFeatureMap(){
 
         return featureMap;
     }
 
+    public Double [][] getKernel(){
+
+        return kernel;
+    }
 
     public Double [][] getInputMap(){
 

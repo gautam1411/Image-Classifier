@@ -1,7 +1,6 @@
 /***
  *
  *
- *
  *  ConvNet Class  defines Architecture of Convolutional Neural Network
  *
  */
@@ -18,6 +17,8 @@ public class ConvNet{
     private Pooling maxPool1;
     private Convolution conv2;
     private Pooling maxPool2;
+    private Convolution conv3;
+    private Pooling maxPool3;
     private FlatLayer flat;
     private OutputLayer out;
 
@@ -30,6 +31,8 @@ public class ConvNet{
        maxPool1     = new Pooling(conv1, debugCNN);                                       // Pool-1
        conv2        = new Convolution(maxPool1, hyperparameters,  debugCNN);              // Conv-2
        maxPool2     = new Pooling(conv2, debugCNN);                                       // Pool-2
+       //conv3        = new Convolution(maxPool2, hyperparameters,debugCNN);              // Conv-3
+       //maxPool3     = new Pooling(conv3, debugCNN);                                     // Pool-3
        flat         = new FlatLayer(maxPool2, debugCNN);                                  // Flat Fully Connected Layer
        out          = new OutputLayer(flat, hyperparameters, debugCNN);                   // Output Layer
 
@@ -46,8 +49,22 @@ public class ConvNet{
            maxPool1.train(conv1);
            conv2.train(maxPool1);
            maxPool2.train(conv2);
+           //conv3.train(maxPool2);
+          // maxPool3.train(conv3);
+
            flat.train(maxPool2);
            out.train(flat);
+           out.backpropagate();
+           flat.backpropagate(out);
+
+           //maxPool3.backpropagate(flat);
+          // conv3.backpropagate(maxPool3);
+
+           maxPool2.backpropagate(flat);
+           conv2.backpropagate(maxPool2);
+
+           maxPool1.backpropagate(conv2);
+           conv1.backpropagate(maxPool1);
 
            if (debugCNN) {
 
