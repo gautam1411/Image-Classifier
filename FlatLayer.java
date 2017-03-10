@@ -1,10 +1,9 @@
-/**
- *
+/***********************************************************************************************************************
  *
  *
  * This class defines fully connected(flat) layer in ConvNet
  *
- */
+ **********************************************************************************************************************/
 
 import java.util.ArrayList;
 
@@ -84,8 +83,9 @@ public class FlatLayer{
         input = new Double[countInputs];
         errors = new Double[countInputs+1];
 
-        if(debugFlatLayer)
-        System.out.println(" <FlatLayer>: Constructor  for Pool as previous layer  : " + countInputs);
+        if(debugFlatLayer) {
+            System.out.println(" <FlatLayer>: Constructor  for Pool as previous layer  : " + countInputs);
+        }
 
     }
 
@@ -117,7 +117,11 @@ public class FlatLayer{
 
         System.arraycopy(err,0,errors,0,err.length);
 
-        // Nothing to do here as no activation function
+        if(debugFlatLayer){
+
+            System.out.println("<FlatLayer.java : backpropagate> ");
+
+        }
     }
 
     public Double [] getErrors(){

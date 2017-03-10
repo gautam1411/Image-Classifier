@@ -1,10 +1,9 @@
-/***
- *
+/***********************************************************************************************************************
  *
  *
  * Pooling class defines all functionality at pooling layer
  *
- */
+ **********************************************************************************************************************/
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -248,6 +247,10 @@ public class Pooling{
             for(int x = 0; x < err.length; x++)
                 System.arraycopy( err[x], 0, error[x+kernel_size/2],kernel_size/2,err[x].length);
 
+        }
+
+        if(debugPool){
+            System.out.println("<Pooling.java : backpropagate>  ");
         }
 
     }

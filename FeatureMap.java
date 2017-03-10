@@ -1,9 +1,9 @@
-/*****
- *
+/***********************************************************************************************************************
  *
  *
  *  Class for feature(activation) map instance and related methods
- */
+ *
+ **********************************************************************************************************************/
 
 import java.util.Random;
 import java.util.Vector;
@@ -17,6 +17,7 @@ public class FeatureMap{
     private Double [][] featureMap;
     private Double [][] inputFeature;
     private Double [][] kernel;
+    private Double bias;
     private Double [][] errors;
 
     private Double label;
@@ -56,8 +57,20 @@ public class FeatureMap{
                 //System.out.println("  activation : temp1, temp2 " + temp1+"   "+temp2);
                 val += inputFeature[i+row] [j+col] *  kernel[i][j];
             }
-        return val;
+        return val+bias;
     }
+
+    public void print_kernel() {
+
+        for (int i = 0; i < kernel_size; i++) {
+            for (int j = 0; j < kernel_size; j++) {
+
+               System.out.print(" " +kernel[i][j]);
+            }
+            System.out.println("");
+        }
+    }
+
 
     public Double LeakyRELU(Double activn){
 
@@ -88,12 +101,14 @@ public class FeatureMap{
             }
         }
 
+        if(debugFeatMap){
+            System.out.println("Kernel  =>>>>:    computeFeatureMap ");
+            print_kernel();
+        }
+
     }
 
     public void readFeatureVector( Vector<Double> featureVector){
-
-        if(debugFeatMap)
-        System.out.println(" Pending: <FeatureMap> : conversion to featuremap input when RGB is used");
 
         for(int index = 0; index < featureVector.size() - 1 ; index++){
 
@@ -116,6 +131,7 @@ public class FeatureMap{
     public void initKernel(){
 
         Random rand = new Random();
+        Random randSign = new Random();
 
         for(int i = 0; i < kernel_size; i++)
             for(int j = 0; j < kernel_size; j++ ){
@@ -124,7 +140,15 @@ public class FeatureMap{
                 can extract low level features/patterns
              */
                 kernel[i][j] = rand.nextDouble();
+
+                int sign = randSign.nextInt() %3;
+                if(sign == 0)
+                    kernel[i][j] *= -1.0;
         }
+
+        bias = rand.nextDouble();
+        if( bias > 0.0)
+            bias *= -1.0;
     }
 
     public void printActivationMap(){

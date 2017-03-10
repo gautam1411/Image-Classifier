@@ -25,7 +25,7 @@ import javax.imageio.ImageIO;
 
 public class Lab3DNN {
 
-    private static int     imageSize = 128; // Images are imageSize x imageSize.  The provided data is 128x128, but this can be resized by setting this value (or passing in an argument).
+    private static int     imageSize = 32; // Images are imageSize x imageSize.  The provided data is 128x128, but this can be resized by setting this value (or passing in an argument).
     // You might want to resize to 8x8, 16x16, 32x32, or 64x64; this can reduce your network size and speed up debugging runs.
     // ALL IMAGES IN A TRAINING RUN SHOULD BE THE *SAME* SIZE.
     private static enum    Category { airplanes, butterfly, flower, grand_piano, starfish, watch };  // We'll hardwire these in, but more robust code would not do so.
@@ -39,7 +39,7 @@ public class Lab3DNN {
     // The last element in this vector holds the 'teacher-provided' label of the example.
 
     private static double eta       =    0.1, fractionOfTrainingToUse = 1.00, dropoutRate = 0.50; // To turn off drop out, set dropoutRate to 0.0 (or a neg number).
-    private static int    maxEpochs = 1; // Feel free to set to a different value. 1000
+    private static int    maxEpochs = 100; // Feel free to set to a different value. 1000
 
     public static void main(String[] args) {
 
@@ -458,8 +458,8 @@ public class Lab3DNN {
 
         boolean debugDeepCNN        = false;
 
-        int countActivationMapsConv = 1;
-        int kernelSizeConv          = 9;
+        int countActivationMapsConv = 20;
+        int kernelSizeConv          = 5;
         int countClasses            = 6;
         int padding                 = 0;
         int stride                  = 1;
@@ -478,16 +478,19 @@ public class Lab3DNN {
 
             permute(trainFeatureVectors);
 
-            CNN.trainCNN(trainFeatureVectors);
-            //CNN.tuneCNN(tuneFeatureVectors);
+            trainSetErrors = CNN.trainCNN(trainFeatureVectors);
+            tuneSetErrors = CNN.tuneCNN(tuneFeatureVectors);
 
             System.out.println("Done with Epoch # " + comma(epochCount) + ".  Took " + convertMillisecondsToTimeSpan(System.currentTimeMillis() - start) + " (" + convertMillisecondsToTimeSpan(System.currentTimeMillis() - overallStart) + " overall).");
             //reportConvNetConfig(); // Print out some info after epoch, so you can see what experiment is running in a given console.
             start = System.currentTimeMillis();
+            if(tuneSetErrors < best_tuneSetErrors) {
+                best_tuneSetErrors = tuneSetErrors;
+                best_epoch = epochCount;
+            }
 
         }
-
-        //CNN.testCNN(testFeatureVectors);
+        testSetErrors = CNN.testCNN(testFeatureVectors);
 
         System.out.println("\n***** Best tuneset errors = " + comma(best_tuneSetErrors) + " of " + comma(tuneFeatureVectors.size()) + " (" + truncate((100.0 *      best_tuneSetErrors) / tuneFeatureVectors.size(), 2) + "%) at epoch = " + comma(best_epoch)
                 + " (testset errors = "    + comma(testSetErrorsAtBestTune) + " of " + comma(testFeatureVectors.size()) + ", " + truncate((100.0 * testSetErrorsAtBestTune) / testFeatureVectors.size(), 2) + "%).\n");

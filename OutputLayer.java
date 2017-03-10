@@ -1,9 +1,8 @@
-/**
- *
+/***********************************************************************************************************************
  *
  * This class defines Output Layer
  *
- */
+ **********************************************************************************************************************/
 
 import java.util.Random;
 
@@ -14,6 +13,7 @@ public class OutputLayer{
     private Double [] output;
     private Double [] expected;
     private Double [][] weights;
+    private Double []  bias;
     private Double [] errors;
 
     private boolean debugOutputLayer = false;
@@ -72,6 +72,10 @@ public class OutputLayer{
                     weights[i][j] *= -1;
 
             }
+            Double bias =  weights[i][weights[0].length -1 ];
+            if(bias > 0.0)
+                bias *= -1.0;
+            weights[i][weights[0].length -1 ] = bias;
 
         }
 
@@ -84,6 +88,25 @@ public class OutputLayer{
         }
         System.out.println("");
         System.out.println("Input image label : "+label);
+    }
+
+
+    public int reportPredictionError(){
+
+        int predicted_index = ( Double.valueOf(label) ).intValue( ) ;
+        int max_index = -1;
+        Double max_score = Double.MIN_VALUE;
+        for(int i = 0; i < countClasses; i++){
+
+            if(output[i] > max_score){
+                max_score = output[i];
+                max_index = i;
+            }
+
+        }
+
+        return (max_index == predicted_index) ? 0: 1 ;
+
     }
 
     public void readInputs(FlatLayer flat){
@@ -112,10 +135,10 @@ public class OutputLayer{
 
             for( int j = 0; j < weights[0].length-1; j++) {
 
-                System.out.println(" i,j : " + i+"   "+j);
+                //System.out.println(" i,j : " + i+"   "+j);
                 sum += weights[i][j] * inputs[j] ;
             }
-            output[i] = sum;
+            output[i] = sum + weights[i][weights[0].length-1];
 
         }
 
@@ -147,10 +170,16 @@ public class OutputLayer{
         int predicted_index = ( Double.valueOf(label) ).intValue( ) ;
         expected[predicted_index] = 1.0;
 
+
         for(int i = 0 ; i < errors.length; i++) {
             errors[i] = 0.0;
         }
 
+        if(debugOutputLayer){
+
+            System.out.println("<OutputLayer.java : backpropagate> : predicted class " +predicted_index);
+
+        }
 
         for( int i = 0 ; i < inputs.length; i++ ){
 
@@ -162,20 +191,18 @@ public class OutputLayer{
                 if( j == predicted_index){
 
                    weights[j][i] += ((1- output[j]) *  (output[j]) ) * learning_rate * inputs[i];
-                   //if(true)
-                   //    System.out.println("<OutLayer> i  , j  : " +i+"   "+j+  "  "+errors[i]);
-                   //System.out.println(" "+errors.length+ "  "+output.length+  "  " +inputs.length);
-                   errors[i] += ((1- output[j]) *  (output[j]) );
-
+                   errors[i] += ((1- output[j]) *  ( output[j]) );
 
                 }else{
 
                     weights[j][i] += ((0- output[j]) *  (output[j]) ) * learning_rate * inputs[i];
-
-                    //if(true)
-                    //    System.out.println("<OutLayer> i  , j  : " +i+"   "+j+ "   "+errors[j]);
-                   // System.out.println(" "+errors.length+ "  "+output.length+  "  " +inputs.length);
                     errors[i] +=  ((0- output[j]) *  (output[j]) );
+                }
+
+                if(debugOutputLayer){
+
+                    System.out.println("<OutLayer.java: backpropagate > i  , j  : " +i+"   "+j+  "  "+errors[i]);
+                    System.out.println(" "+errors.length+ "  "+output.length+  "  " +inputs.length);
                 }
             }
         }

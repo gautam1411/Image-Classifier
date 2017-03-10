@@ -1,9 +1,8 @@
-/**********************
- *
- *
+/***********************************************************************************************************************
  *
  *  Convolution class holds all feature(activation) maps in the convolution layer and related methods
- */
+ *
+ **********************************************************************************************************************/
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,23 +18,24 @@ public class Convolution{
     private ArrayList<FeatureMap> feature_maps;
     // Size of filter or kernel
     private int kernel_size;
-    // Stride
+    // Stride size
     private int stride;
-    // Padding
+    // Padding size
     private int padding;
     // Number of feature maps
     public int countFeatureMaps;
-    // Image size
+    // Input size
     private int input_size;
     // Output size
     public int outputVol;
-
+    // label of image from feature vector
     private Double label;
 
 
     public Convolution(){
 
-        System.out.println("  Conv Layer Default constructor ");
+        if(debugconv)
+        System.out.println("<Convolution.java : Convolution >  Conv Layer Default constructor ");
 
         this.feature_maps = new ArrayList<FeatureMap>();
     }
@@ -52,7 +52,7 @@ public class Convolution{
         input_size = (int ) Math.round( Math.sqrt(inputFeatureVectors.get(0).size()-1) );
 
         if(debugconv){
-            System.out.println(" Conv Layer Constructor ");
+            System.out.println("<Convolution.java : Convolution >  Conv Layer parameterized constructor ");
             System.out.println(" Trace <ConvLayer>:  Number of Input Vectors : "+ inputFeatureVectors.size())  ;
             System.out.println(" Trace <ConvLayer>:  Input Vector size       :  "+ inputFeatureVectors.get(0).size());
             // 2D Image is encoded into 1-D feature vector + label as last item
@@ -99,9 +99,6 @@ public class Convolution{
         setHyperParameters( hyperparameters);
 
 
-        if(debugconv)
-        System.out.println(" Conv Layer Constructor ");
-
         this.feature_maps = new ArrayList<FeatureMap> ();
 
 
@@ -109,6 +106,7 @@ public class Convolution{
 
 
         if(debugconv){
+            System.out.println("<Convolution.java : Convolution >  Conv Layer parameterized constructor ");
             //System.out.println(" Trace <ConvLayer>:  Number of Input Vectors : "+ inputFeatureVectors.size())  ;
             //System.out.println(" Trace <ConvLayer>:  Input Vector size       :  "+ inputFeatureVectors.get(0).size());
             // 2D Image is encoded into 1-D feature vector + label as last item
@@ -138,8 +136,10 @@ public class Convolution{
         if(debugconv)
         System.out.println(" <ConvLayer> : calcFeatureMaps");
 
-        for(FeatureMap feature_map: feature_maps)
+        for(FeatureMap feature_map: feature_maps) {
+
             feature_map.computeFeatureMap(stride, padding);
+        }
 
     }
 
@@ -172,8 +172,9 @@ public class Convolution{
 
         this.label = featureVector.get(featureVector.size()-1);
 
-        if(debugconv)
+        if(debugconv) {
             System.out.println(" Image Label : " + debugconv);
+        }
 
     }
 
@@ -191,8 +192,10 @@ public class Convolution{
             Double [][] input  = pMap.getOutput();
 
 
-            for( int j = 0; j< input.length; j++)
-                System.arraycopy(input[j],0, inp[j] , 0, input[j].length);
+            for( int j = 0; j< input.length; j++) {
+
+                System.arraycopy(input[j], 0, inp[j], 0, input[j].length);
+            }
 
         }
 
@@ -221,7 +224,6 @@ public class Convolution{
 
         readInputFeature(pool.get_P_maps());
         calcFeatureMaps();
-
 
     }
 
@@ -342,7 +344,7 @@ public class Convolution{
         }
 
     }
-    */
+
 
     public void backpropagate(Pooling pool){
 
@@ -363,10 +365,12 @@ public class Convolution{
             //Double[][] ker = fm.getKernel();
             //Double[][] inp = fm.getInputMap();
 
-            System.out.println(" Error vector dimension :" + err.length + "  " + err[0].length);
+           // System.out.println(" Error vector dimension :" + err.length + "  " + err[0].length);
 
-            for( int x = 0 ;x<error.length ; x++ )
+            for( int x = 0 ;x<error.length ; x++ ) {
+
                 Arrays.fill(error[x], 0.0);
+            }
 
 
             for(int j = 0; j < err.length; j++){
@@ -393,15 +397,14 @@ public class Convolution{
 
                     }
 
-                    if (true) {
+                    if (debugconv) {
                         System.out.println(" Max value: " + max_val + " , Ind1: " + ind1 + "  ,Ind2  : " + ind2);
-                        System.out.println("<Convolution.java> : j,k  > " + j + "  " + k);
+                        System.out.println("<Convolution.java: backpropagate> : j,k  > " + j + "  " + k);
                     }
 
                     if (ind1 == -1 || ind2 == -1) {
 
-                        if (true)
-                            System.out.println("<Convolution.java> : Failed to find indices of winner value");
+                            System.out.println("<Convolution.java: backpropagation> : Failed to find indices of winner value");
                     }else{
 
                         error[ind1][ind2] = err[j][k];
@@ -426,8 +429,8 @@ public class Convolution{
             Double [][] ker = fm.getKernel();
             Double [][] inp = fm.getInputMap();
 
-            if(debugconv)
-            System.out.println(" Error vector dimension :"+err.length+ "  "+err[0].length);
+            //if(debugconv)
+           // System.out.println(" Error vector dimension :"+err.length+ "  "+err[0].length);
 
             for(int j=0; j < err.length; j++){
 
@@ -455,6 +458,106 @@ public class Convolution{
         }
 
     }
+
+    */
+
+    public void backpropagate(Pooling pool){
+
+
+        Double learning_rate = 0.01;
+
+        ArrayList<PoolMap> pmaps = pool.get_P_maps();
+
+
+        for ( int i = 0; i < pmaps.size(); i ++){
+
+            PoolMap pm =pmaps.get(i);
+            Double [][] err = pm.getErrors();
+            int [][] wi  = pm.getWinner_index();
+
+            FeatureMap fm = feature_maps.get(i);
+            Double [][] error = fm.getErrors();
+            Double[][] out = fm.getFeatureMap();
+
+            for( int x = 0 ;x<error.length ; x++ ) {
+
+                Arrays.fill(error[x], 0.0);
+            }
+
+
+            for(int j = 0; j < err.length; j++){
+
+                for(int k = 0; k < err[0].length ; k++){
+
+                    int ind1 = wi[j][2*k];
+                    int ind2 = wi[j][2*k +1];
+
+                    if (debugconv) {
+
+                        System.out.println( " Ind1: " + ind1 + "  ,Ind2  : " + ind2);
+                        System.out.println("<Convolution.java: backpropagate> : j,k  > " + j + "  " + k);
+
+                    }
+
+                    if (ind1 == -1 || ind2 == -1) {
+
+                        System.out.println("<Convolution.java: backpropagation> : Failed to find indices of winner value");
+
+                        //error[ind1][ind2] = 0.0;
+                    }else{
+
+                        error[ind1][ind2] = err[j][k];
+
+                    }
+
+                }
+            }
+
+        }
+
+        // For each plate ( feature/ activation map) do the following
+        // <1> For each entry in error matrix
+
+        for( int i = 0 ; i < feature_maps.size(); i++){
+
+
+            FeatureMap fm = feature_maps.get(i);
+
+            Double [][] err = fm.getErrors();
+            Double [][] out = fm.getFeatureMap();
+            Double [][] ker = fm.getKernel();
+            Double [][] inp = fm.getInputMap();
+
+            //if(debugconv)
+            // System.out.println(" Error vector dimension :"+err.length+ "  "+err[0].length);
+
+            for(int j=0; j < err.length; j++){
+
+                for(int k = 0; k < err[0].length; k++){
+                    // Remember we have calculated activation of neuron as
+                    // featureMap[i][j] = RELU(activation (i,j) );
+                    // we should compute gradient and update kernel
+
+                    if(err[j][k] != 0.0) {
+
+                        for (int p = 0; p < kernel_size; p++) {
+
+                            for (int q = 0; q < kernel_size; q++) {
+
+                                if(debugconv)
+                                    System.out.println(" " + p + " " + q + " " + j + " " + k + " ");
+
+                                ker[p][q] += err[j][k] * learning_rate * inp[p + j][q + k];
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+    }
+
 
     public int getKernelSize(){
 
