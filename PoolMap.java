@@ -1,18 +1,19 @@
-/***********************************************************************************************************************
+/**
+*
+ *
  *
  *  Class PoolPlate describes plates in a pooling layer and related methods
- *
- **********************************************************************************************************************/
+ */
 
 
 public class PoolMap{
+
 
     private Double label;
 
     private Double [][] inputFeature;
     private Double [][] outputMap;
     private Double [][] errors;
-    private int [][] winner_index;
 
     //private int poolRatio;
     private boolean debugPoolMap = false;
@@ -21,25 +22,22 @@ public class PoolMap{
     private int outVol;
 
 
+
     public PoolMap(int plateSize, int outVol, boolean debugSwitch){
 
         debugPoolMap = debugSwitch;
 
-        if(debugPoolMap) {
-
-            System.out.println("Input plate size: " + plateSize + " Output plate size: " + outVol);
-        }
+        if(debugSwitch)
+            System.out.println("Input plate size: "+plateSize + " Output plate size: " + outVol);
 
         if( plateSize <= 0 || outVol <= 0 ){
 
             System.out.println("<PoolMap> : Invalid parameter");
-
         }else {
-
             inputFeature = new Double[plateSize][plateSize];
             outputMap = new Double[outVol][outVol];
             errors = new Double[outVol][outVol];
-            winner_index = new int [outVol][outVol*2];
+            debugPoolMap = debugSwitch;
 
             this.plateSize = plateSize;
             this.outVol = outVol;
@@ -60,6 +58,8 @@ public class PoolMap{
             System.out.println("<PoolMap> : Invalid parameter");
         }
 
+        //if(debugPoolMap)
+         //   System.out.println("<PoolMap>: poolRatio : " +poolRatio );
 
         for(int i = 0; i< outputMap.length; i++)
             for(int j =0 ; j < outputMap[0].length;  j++){
@@ -75,37 +75,22 @@ public class PoolMap{
         if(outputMap.length != 0) {
 
            poolRatio =  inputFeature.length / outputMap.length;
-
         }else{
-
             System.out.println(" <PoolMap> : Invalid parameter");
         }
 
         Double max = Double.MIN_VALUE;
-        int ind1 = -1;
-        int ind2 = -1;
 
         for(int i = poolRatio* row; i < (row+1)*poolRatio ; i++) {
             for (int j = poolRatio * col; j < (col + 1) * poolRatio; j++) {
 
-                if (inputFeature[i][j] > max) {
-
+                if (inputFeature[i][j] > max)
                     max = inputFeature[i][j];
-                    ind1 = i;
-                    ind2 = j;
-                }
             }
         }
 
-        if(debugPoolMap) {
-
-            System.out.println("<PoolMap>: max value : " + max);
-        }
-
-        // Save indices of winner votes to use in backprop
-
-        winner_index[row][2*col] = ind1;
-        winner_index[row][2*col +1] = ind2;
+        if(debugPoolMap)
+            System.out.println("<PoolMap>: max value : " +max );
 
         return max;
     }
@@ -121,10 +106,8 @@ public class PoolMap{
             System.out.println("<PoolMap> : Invalid parameter");
         }
 
-        if(debugPoolMap) {
-
-            System.out.println("<PoolMap>: poolRatio : " + poolRatio);
-        }
+        if(debugPoolMap)
+            System.out.println("<PoolMap>: poolRatio : " +poolRatio );
 
         for(int i = 0; i< outputMap.length; i++)
             for(int j =0 ; j < outputMap[0].length;  j++){
@@ -190,17 +173,13 @@ public class PoolMap{
 
     public Double [][] getOutput (){
 
+
         return  outputMap;
     }
 
     public void backpropagate(){
 
 
-    }
-
-    public int [][] getWinner_index(){
-
-        return winner_index;
     }
 
     public Double[][] getErrors(){

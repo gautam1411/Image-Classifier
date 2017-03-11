@@ -38,7 +38,7 @@ public class Lab3DNN {
     // Or use the get2DfeatureValue() 'accessor function' that maps 2D coordinates into the 1D vector.
     // The last element in this vector holds the 'teacher-provided' label of the example.
 
-    private static double eta       =    0.1, fractionOfTrainingToUse = 1.00, dropoutRate = 0.50; // To turn off drop out, set dropoutRate to 0.0 (or a neg number).
+    private static double eta       =    0.1, fractionOfTrainingToUse = 1.00, dropoutRate = 0.0; // To turn off drop out, set dropoutRate to 0.0 (or a neg number).
     private static int    maxEpochs = 100; // Feel free to set to a different value. 1000
 
     public static void main(String[] args) {
@@ -481,19 +481,24 @@ public class Lab3DNN {
             trainSetErrors = CNN.trainCNN(trainFeatureVectors);
             tuneSetErrors = CNN.tuneCNN(tuneFeatureVectors);
 
-            System.out.println("Done with Epoch # " + comma(epochCount) + ".  Took " + convertMillisecondsToTimeSpan(System.currentTimeMillis() - start) + " (" + convertMillisecondsToTimeSpan(System.currentTimeMillis() - overallStart) + " overall).");
-            //reportConvNetConfig(); // Print out some info after epoch, so you can see what experiment is running in a given console.
-            start = System.currentTimeMillis();
             if(tuneSetErrors < best_tuneSetErrors) {
+                System.out.println("Tune set results better than last best epoch");
                 best_tuneSetErrors = tuneSetErrors;
                 best_epoch = epochCount;
             }
 
+            System.out.println("Done with Epoch # " + comma(epochCount) + ".  Took " + convertMillisecondsToTimeSpan(System.currentTimeMillis() - start) + " (" + convertMillisecondsToTimeSpan(System.currentTimeMillis() - overallStart) + " overall).");
+            //reportConvNetConfig(); // Print out some info after epoch, so you can see what experiment is running in a given console.
+            start = System.currentTimeMillis();
+
         }
+
         testSetErrors = CNN.testCNN(testFeatureVectors);
 
-        System.out.println("\n***** Best tuneset errors = " + comma(best_tuneSetErrors) + " of " + comma(tuneFeatureVectors.size()) + " (" + truncate((100.0 *      best_tuneSetErrors) / tuneFeatureVectors.size(), 2) + "%) at epoch = " + comma(best_epoch)
-                + " (testset errors = "    + comma(testSetErrorsAtBestTune) + " of " + comma(testFeatureVectors.size()) + ", " + truncate((100.0 * testSetErrorsAtBestTune) / testFeatureVectors.size(), 2) + "%).\n");
+        System.out.println("\n***** Best tuneset errors = " + comma(best_tuneSetErrors) + " of " + comma(tuneFeatureVectors.size()) + " (" + truncate((100.0 *      best_tuneSetErrors) / tuneFeatureVectors.size(), 2) + "%) at epoch = " + comma(best_epoch));
+               // + " (testset errors = "    + comma(testSetErrorsAtBestTune) + " of " + comma(testFeatureVectors.size()) + ", " + truncate((100.0 * testSetErrorsAtBestTune) / testFeatureVectors.size(), 2) + "%).\n");
+        System.out.println( " (testset errors = "    + comma(testSetErrors) + " of " + comma(testFeatureVectors.size()) + ", " + truncate((100.0 * testSetErrors) / testFeatureVectors.size(), 2) + "%).\n");
+
 
         return testSetErrorsAtBestTune;
     }

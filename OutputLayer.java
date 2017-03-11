@@ -1,8 +1,9 @@
-/***********************************************************************************************************************
+/**
+ *
  *
  * This class defines Output Layer
  *
- **********************************************************************************************************************/
+ */
 
 import java.util.Random;
 
@@ -13,8 +14,10 @@ public class OutputLayer{
     private Double [] output;
     private Double [] expected;
     private Double [][] weights;
-    private Double []  bias;
+    private Double [][] oldWeights;
     private Double [] errors;
+    private int countCorrect;
+    private int confusionMatrix [][];//rows = predicted and cols = actual
 
     private boolean debugOutputLayer = false;
     private int countClasses;
@@ -35,7 +38,9 @@ public class OutputLayer{
         debugOutputLayer = debugSwitch;
         countClasses = (hyperparameters >> 24)& (0XF);
 
-        int countInputs = flat.getCountInputs();
+        int countInputs = flat.getCountOutputs();
+        
+        countCorrect = 0;
 
         if(debugOutputLayer) {
             System.out.println("<OutputLayer> : OutputLayer Constructor previous layer as FlatLayer ");
@@ -47,19 +52,21 @@ public class OutputLayer{
         if( countInputs <= 0 || countClasses <= 0){
             System.out.println("<OutputLayer> : Inavlid parameter");
         }else {
-            inputs = new Double[countInputs];
+            inputs = new Double[countInputs+1];
+            confusionMatrix = new int [countClasses][countClasses];
             output = new Double[countClasses];
             expected = new Double[countClasses];
             weights = new Double[countClasses][countInputs + 1]; // all inputs + bias
-            errors = new Double[countInputs + 1];
+            oldWeights = new Double[countClasses][countInputs + 1]; // all inputs + bias
+            errors = new Double[countClasses];
             initWeights();
         }
     }
 
     public void initWeights(){
 
-        Random rand = new Random();
-        Random randSign = new Random();
+        Random rand = new Random(2);
+        Random randSign = new Random(2);
 
         for(int i = 0; i < weights.length; i++){
 
@@ -72,10 +79,6 @@ public class OutputLayer{
                     weights[i][j] *= -1;
 
             }
-            Double bias =  weights[i][weights[0].length -1 ];
-            if(bias > 0.0)
-                bias *= -1.0;
-            weights[i][weights[0].length -1 ] = bias;
 
         }
 
@@ -83,47 +86,42 @@ public class OutputLayer{
 
     public void printPrediction(){
 
-        for(int i = 0; i < countClasses; i++){
-            System.out.println("  "+i+" : "+output[i]);
+    	int index = 0;
+    	double bestVal = 0.0;
+    	
+        if(output[Double.valueOf(label).intValue()].doubleValue() > 0.5){
+        	countCorrect++;
+        	confusionMatrix[Double.valueOf(label).intValue()][Double.valueOf(label).intValue()]++;
+        	return;
         }
-        System.out.println("");
-        System.out.println("Input image label : "+label);
-    }
-
-
-    public int reportPredictionError(){
-
-        int predicted_index = ( Double.valueOf(label) ).intValue( ) ;
-        int max_index = -1;
-        Double max_score = Double.MIN_VALUE;
         for(int i = 0; i < countClasses; i++){
-
-            if(output[i] > max_score){
-                max_score = output[i];
-                max_index = i;
+            if(output[i].doubleValue() > bestVal){
+            	index = i;
+            	bestVal = output[i].doubleValue();
             }
-
         }
+        confusionMatrix[index][Double.valueOf(label).intValue()]++;
 
-        return (max_index == predicted_index) ? 0: 1 ;
-
+       // System.out.println("Input image label : "+label+ " Predicted Label " +Double.valueOf(label).intValue() + " In output: " + output[Double.valueOf(label).intValue()]);
+        // System.out.println("");
     }
 
     public void readInputs(FlatLayer flat){
 
         this.label = flat.getLabel();
-        Double [] ip = flat.getInput();
+        Double [] ip = flat.getOutput();
 
-        for (int i = 0; i < inputs.length; i++) {
+        for (int i = 0; i < inputs.length-1; i++) {
 
             inputs[i] = ip[i];
             //System.out.println(" index: "+i+"   :  "+inputs[i]);
         }
+        inputs[inputs.length-1] = 1.0; //bias unit
+        
         if(debugOutputLayer)
         System.out.println("<OutputLayer> Input read successfully : " + inputs.length);
 
     }
-
 
     public void train(FlatLayer flat){
 
@@ -135,18 +133,37 @@ public class OutputLayer{
 
             for( int j = 0; j < weights[0].length-1; j++) {
 
-                //System.out.println(" i,j : " + i+"   "+j);
+               // System.out.println(" i,j : " + i+"   "+j);
                 sum += weights[i][j] * inputs[j] ;
             }
-            output[i] = sum + weights[i][weights[0].length-1];
+            output[i] = sum;
 
         }
 
-        softmax(output);
-        printPrediction();
+        //softmax(output);
+        sigmoid(output);
+        //printPrediction();
 
     }
+    
+    
+    
+    public void sigmoid( Double output[] ){
+    	
+    	 for(int i =0 ; i < output.length; i++){
+             output[i] = ( 1 / ( 1 + Math.exp( -output[i] )) );
+         }
+    }
 
+    public int getCountCorrect(){
+    	
+    	return countCorrect;
+    }
+    
+    public void resetCountCorrect(){
+    	countCorrect = 0;
+    }
+    
     public void softmax( Double output[] ){
 
         Double sum = 0.0;
@@ -164,49 +181,81 @@ public class OutputLayer{
 
     public void backpropagate( ){
 
-        // Assume  ==> learning rate =  0
-        Double learning_rate = 0.01;
+        // Assume  ==> learning rate =  0.01
+        Double learning_rate = 0.001;
 
         int predicted_index = ( Double.valueOf(label) ).intValue( ) ;
         expected[predicted_index] = 1.0;
-
 
         for(int i = 0 ; i < errors.length; i++) {
             errors[i] = 0.0;
         }
 
-        if(debugOutputLayer){
+        for( int i = 0 ; i < output.length; i++ ){
 
-            System.out.println("<OutputLayer.java : backpropagate> : predicted class " +predicted_index);
+        	//should weights add the delta or subtract the delta/error?
+            if( i == predicted_index){
+               errors[i] += ( 1 - output[i] );
+            }else{
+               errors[i] +=  ( 0 - output[i] );
+            }
 
-        }
+            for(int j = 0; j < inputs.length; j++){
 
-        for( int i = 0 ; i < inputs.length; i++ ){
-
-            errors[i] = 0.0;
-
-            for(int j = 0; j < output.length; j++){
-
-
-                if( j == predicted_index){
-
-                   weights[j][i] += ((1- output[j]) *  (output[j]) ) * learning_rate * inputs[i];
-                   errors[i] += ((1- output[j]) *  ( output[j]) );
-
-                }else{
-
-                    weights[j][i] += ((0- output[j]) *  (output[j]) ) * learning_rate * inputs[i];
-                    errors[i] +=  ((0- output[j]) *  (output[j]) );
-                }
-
-                if(debugOutputLayer){
-
-                    System.out.println("<OutLayer.java: backpropagate > i  , j  : " +i+"   "+j+  "  "+errors[i]);
-                    System.out.println(" "+errors.length+ "  "+output.length+  "  " +inputs.length);
-                }
+            	//should weights add the delta or subtract the delta/error?
+            	oldWeights[i][j] = weights[i][j];
+                weights[i][j] += errors[i] * learning_rate * inputs[j];
             }
         }
+    }
+    
+    public Double [][] getWeights(){
+    	
+    	return weights;
+    }
+    
+    public Double [][] getOldWeights(){
+    	return oldWeights;
+    }
+    
+    public void zeroConfusionMatrix(){
+    	
+    	for(int i = 0; i < confusionMatrix.length; i++){
+    		for(int j = 0; j < confusionMatrix[0].length; j++){
+    			confusionMatrix[i][j] = 0;
+    		}
+    	}
+    }
+    
+    public int [][] getConfusionMatrix(){
+    	return confusionMatrix;
+    }
+    
+    public void printConfusion(){
+    	for(int i = 0; i < confusionMatrix.length; i++){
+    		for(int j = 0; j < confusionMatrix[0].length; j++){
+    			System.out.print(confusionMatrix[i][j]);
+    			System.out.print(" ");
+    		}
+    		System.out.println("");
+    	}
+    }
 
+    public int reportPredictionError(){
+
+        int predicted_index = ( Double.valueOf(label) ).intValue( ) ;
+        int max_index = -1;
+        Double max_score = Double.MIN_VALUE;
+        for(int i = 0; i < countClasses; i++){
+
+            if(output[i] > max_score){
+                max_score = output[i];
+                max_index = i;
+            }
+
+        }
+
+        return (max_index == predicted_index) ? 0: 1 ;
     }
 
     public Double [] getErrors(){
